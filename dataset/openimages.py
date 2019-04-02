@@ -76,8 +76,9 @@ class OpenImages(data.Dataset):
         
     def __getitem__(self, index):
         image_path = self.image_dir + self.images[index].ID + '.jpg'
-        
-        return self.images[index].getImage(image_path), self.wordEncode.get_sentence_vector(self.images[index].label)
+        im_emb = self.images[index].getImage(image_path)
+        txt_emb =  self.wordEncode.get_sentence_vector( self.images[index].label )
+        return im_emb, txt_emb
         
         
     def __len__(self):
