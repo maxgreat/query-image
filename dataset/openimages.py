@@ -37,9 +37,18 @@ def load_vec(emb_path):
 class WordEncoder:
     def __init__(self, dictFile, vecFile):
         self.model = fastText.load_model(vecFile)
+        self.classDict = {line.split(',')[0]:line.split(',')[1].rstrip() for line in open(dictFile)}
+
+    def get_class_vector(self, c):
+        if c in self.classDict:
+            return self.model.get_word_vector(self.classDict[c])
+        else:
+            print("Word ", c, "not in class dictionnary")
+            return self.model.get_word_vector(c)
 
     def get_sentence_vector(self, sentence):
         return self.model.get_sentence_vector(sentence)
+        
         
 
 class ImageBox:
@@ -55,7 +64,7 @@ class ImageBox:
     def getImage(self, image_path):
         print(self.ID)
         im = Image.open(image_path)
-        return im.crop( (im.width*self.crop[0], im.height*self.crop[2], im.width*self.crop[1], im.height*self.crop[3]) ), self.label
+        return im.crop( (im.width*self.crop[0], im.height*self.crop[2], im.width*self.crop[1], im.height*self.crop[3]) )
         
         
 
@@ -70,14 +79,14 @@ class OpenImages(data.Dataset):
         
         self.images = []
         for i, line in enumerate(reader):
-            if i > 0 and i == 1:
+            if i > 0:
                 self.images.append(ImageBox(line))
 
         
     def __getitem__(self, index):
         image_path = self.image_dir + self.images[index].ID + '.jpg'
-        im_emb = self.images[index].getImage(image_path)
-        txt_emb =  self.wordEncode.get_sentence_vector( self.images[index].label )
+        im_emb = self.transform(self.images[index].getImage(image_path))
+        txt_emb =  self.wordEncode.get_class_vector( self.images[index].label )
         return im_emb, txt_emb
         
         
