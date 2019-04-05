@@ -49,6 +49,9 @@ class WordEncoder:
     def get_sentence_vector(self, sentence):
         return self.model.get_sentence_vector(sentence)
         
+    def get_word_vector(self, word):
+        return self.model.get_word_vector(word)
+        
         
 
 class ImageBox:
@@ -62,8 +65,7 @@ class ImageBox:
                     )
 
     def getImage(self, image_path):
-        print(self.ID)
-        im = Image.open(image_path)
+        im = Image.open(image_path).convert('RGB')
         return im.crop( (im.width*self.crop[0], im.height*self.crop[2], im.width*self.crop[1], im.height*self.crop[3]) )
         
         
