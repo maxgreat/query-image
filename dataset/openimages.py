@@ -46,6 +46,13 @@ class WordEncoder:
             print("Word ", c, "not in class dictionnary")
             return self.model.get_word_vector(c)
 
+    def get_class_from_id(self, c):
+        if c in self.classDict:
+            return self.classDict[c]
+        else:
+            print("Word ", c, "not in class dictionnary")
+            return None
+    
     def get_sentence_vector(self, sentence):
         return self.model.get_sentence_vector(sentence)
         
@@ -70,7 +77,7 @@ class ImageBox:
         
         
 
-class OpenImages(data.Dataset):
+class OpenImagesBbox(data.Dataset):
     def __init__(self, image_dir, bbox_file, classes,transform, sset="train", embeddings="/data/m.portaz/wiki.en.bin"):
         self.transform = transform
         self.image_dir = image_dir
@@ -94,3 +101,35 @@ class OpenImages(data.Dataset):
         
     def __len__(self):
         return len(self.images) 
+        
+        
+
+
+class OpenImages(data.Dataset):
+    def __init__(self, image_dir, image_file, classes,transform, sset="train", embeddings="/data/m.portaz/wiki.en.bin"):
+        self.transform = transform
+        self.image_dir = image_dir
+        self.image_file = image_file
+        self.wordEncode = WordEncoder(classes, embeddings)
+        
+        reader = csv.reader(open(image_file), delimiter=',')
+        
+        self.images = []
+        for i, line in enumerate(reader):
+            if i > 0 and line[3] == '1':
+                self.images.append( (line[0], self.wordEncode.get_class_from_id(line[2]) ) )
+
+        
+    def __getitem__(self, index):
+        image_path = self.image_dir + self.images[index][0] + '.jpg'
+        #return Image.open(image_path), self.wordEncode.get_class_from_id(self.images[index][1])
+        im_emb = self.transform(Image.open(image_path))
+        txt_emb = self.wordEncode.get_word_vector( self.images[index][1] )
+        return im_emb, txt_emb
+        
+        
+    def __len__(self):
+        return len(self.images) 
+        
+
+
