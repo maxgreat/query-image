@@ -123,7 +123,7 @@ class OpenImages(data.Dataset):
     def __getitem__(self, index):
         image_path = self.image_dir + self.images[index][0] + '.jpg'
         #return Image.open(image_path), self.wordEncode.get_class_from_id(self.images[index][1])
-        im_emb = self.transform(Image.open(image_path))
+        im_emb = self.transform(Image.open(image_path).convert("RGB"))
         txt_emb = self.wordEncode.get_word_vector( self.images[index][1] )
         return im_emb, txt_emb
         
