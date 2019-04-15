@@ -4,6 +4,7 @@ import torch.utils.data as data
 import csv
 from PIL import Image
 from nltk.tokenize import word_tokenize
+import random
 
 idx_ID = 0
 idx_Label = 2
@@ -131,5 +132,49 @@ class OpenImages(data.Dataset):
     def __len__(self):
         return len(self.images) 
         
+
+class OpenImagesText(data.Dataset):
+    def __init__(self, image_dir, dataset_file, embeddings, transform, random=1):
+        super().__init__()
+        self.im_dir = image_dir
+        self.imList = []
+        self.embed = embeddings
+        self.transform = transform
+        self.rand = random
+        
+        print("Reading dataset file")
+        for i,line in enumerate(open(dataset_file)):
+            im_name, words = line.rstrip().split("\t")
+            self.imList.append( (im_name, words, len(words.split(' ')) ) )
+        print("Done reading ", i, " lines.")
+            
+    def __len__(self):
+        return len(self.imList)
+        
+    def __getitem__(self, index):
+        image_path = self.im_dir + self.imList[index][0]
+        im_emb = self.transform(Image.open(image_path).convert("RGB"))
+            
+        sentence = ' '.join(random.choices(self.imList[index][1].split(' '), k= max(1, int(self.imList[index][2]*self.rand)) ) )
+        
+        txt_emb = self.embed.get_sentence_vector( self.imList[index][1] )
+        return im_emb, txt_emb 
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
