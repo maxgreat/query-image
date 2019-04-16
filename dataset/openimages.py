@@ -161,20 +161,3 @@ class OpenImagesText(data.Dataset):
         return im_emb, txt_emb 
         
         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
