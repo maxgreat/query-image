@@ -1,16 +1,7 @@
-
 # coding: utf-8
-
-# In[3]:
-
-
 from nltk.corpus import wordnet
 import os.path as pth
 import glob
-
-
-# In[43]:
-
 
 import fastText
 import torch
@@ -20,10 +11,7 @@ from PIL import Image
 from nltk.tokenize import word_tokenize
 import random
 import torchvision.transforms as transforms
-
-
-# In[60]:
-
+import time
 
 class FullImageNet(data.Dataset):
     def __init__(self, main_dir, transform, word_enc = fastText.load_model("/data/m.portaz/wiki.en.bin"), 
@@ -32,7 +20,8 @@ class FullImageNet(data.Dataset):
         self.sset = sset
         self.ts = transform
         self.word_enc = word_enc
-        for directory in glob.iglob(pth.join(main_dir + '*')):
+        t = time.time()
+        for j, directory in enumerate(glob.iglob(pth.join(main_dir + '*'))):
             if pth.isdir(directory):
                 d = pth.basename(directory)
                 s = wordnet.synset_from_pos_and_offset(d[0], int(d[1:]))
@@ -41,8 +30,10 @@ class FullImageNet(data.Dataset):
                     if sset == "train":
                         self.imageList.append( (image, s.lemma_names()) )
                     else :
-                        self.imageList.append( (image, [s.lemma_names()[0]]) )
-                    
+                        if j%20 == 0:
+                            self.imageList.append( (image, [s.lemma_names()[0]]) )
+        print("Reading dataset in ", time.time() - t, " sec")
+        
     def __len__(self):
         return len(self.imageList)
     
@@ -50,10 +41,6 @@ class FullImageNet(data.Dataset):
         im, cl = self.imageList[index]
         txt_emb = self.word_enc.get_sentence_vector( random.choice(cl).replace("_", " ") )
         return self.ts(Image.open(im).convert("RGB")), txt_emb
-
-
-# In[61]:
-
 
 if __name__ == "__main__":
     main_dir = "/data/datasets/imageNet/images/"
