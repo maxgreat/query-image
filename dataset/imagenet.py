@@ -12,6 +12,10 @@ from nltk.tokenize import word_tokenize
 import random
 import torchvision.transforms as transforms
 import time
+import argparse
+import sys
+
+
 
 class FullImageNet(data.Dataset):
     def __init__(self, main_dir, transform, word_enc = fastText.load_model("/data/m.portaz/wiki.en.bin"), 
@@ -44,6 +48,7 @@ class FullImageNet(data.Dataset):
 
 if __name__ == "__main__":
     main_dir = "/data/datasets/imageNet/images/"
+
     normalize = transforms.Normalize(
             mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
